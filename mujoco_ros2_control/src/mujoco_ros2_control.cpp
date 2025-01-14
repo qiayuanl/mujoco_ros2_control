@@ -12,6 +12,7 @@ MujocoRos2Control::MujocoRos2Control(
       mj_model_(mujoco_model),
       mj_data_(mujoco_data),
       logger_(rclcpp::get_logger(node_->get_name() + std::string(".mujoco_ros2_control"))),
+      stop_cm_thread_(false),
       control_period_(rclcpp::Duration(1, 0)),
       last_update_sim_time_ros_(0, 0, RCL_ROS_TIME)
 {

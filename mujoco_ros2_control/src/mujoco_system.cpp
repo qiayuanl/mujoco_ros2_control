@@ -1,5 +1,7 @@
 #include "mujoco_ros2_control/mujoco_system.hpp"
 
+#include <hardware_interface/types/hardware_interface_type_values.hpp>
+
 namespace mujoco_ros2_control
 {
 MujocoSystem::MujocoSystem() : logger_(rclcpp::get_logger("")) {}
@@ -42,6 +44,7 @@ hardware_interface::return_type MujocoSystem::read(
     data.torque.data.y() = -mj_data_->sensordata[data.torque.mj_sensor_index + 1];
     data.torque.data.z() = -mj_data_->sensordata[data.torque.mj_sensor_index + 2];
   }
+  return hardware_interface::return_type::OK;
 }
 
 hardware_interface::return_type MujocoSystem::write(
@@ -111,6 +114,7 @@ hardware_interface::return_type MujocoSystem::write(
         clamp(joint_state.effort_command, min_eff, max_eff);
     }
   }
+  return hardware_interface::return_type::OK;
 }
 
 bool MujocoSystem::init_sim(

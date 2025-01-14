@@ -2,8 +2,9 @@
 #define MUJOCO_ROS2_CONTROL__MUJOCO_SYSTEM_HPP_
 
 #include <Eigen/Dense>
+#include <vector>
+
 #include "control_toolbox/pid.hpp"
-#include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "joint_limits/joint_limits.hpp"
 #include "mujoco_ros2_control/mujoco_system_interface.hpp"
 
