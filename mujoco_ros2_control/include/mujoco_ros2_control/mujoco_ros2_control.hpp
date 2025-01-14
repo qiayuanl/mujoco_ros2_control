@@ -1,9 +1,9 @@
 #ifndef MUJOCO_ROS2_CONTROL__MUJOCO_ROS2_CONTROL_HPP_
 #define MUJOCO_ROS2_CONTROL__MUJOCO_ROS2_CONTROL_HPP_
 
-#include "rclcpp/rclcpp.hpp"
-#include "pluginlib/class_loader.hpp"
 #include "controller_manager/controller_manager.hpp"
+#include "pluginlib/class_loader.hpp"
+#include "rclcpp/rclcpp.hpp"
 #include "rosgraph_msgs/msg/clock.hpp"
 
 #include "mujoco/mujoco.h"
@@ -15,7 +15,7 @@ namespace mujoco_ros2_control
 class MujocoRos2Control
 {
 public:
-  MujocoRos2Control(rclcpp::Node::SharedPtr & node, mjModel* mujoco_model, mjData* mujoco_data);
+  MujocoRos2Control(rclcpp::Node::SharedPtr &node, mjModel *mujoco_model, mjData *mujoco_data);
   ~MujocoRos2Control();
   void init();
   void update();
@@ -23,8 +23,8 @@ public:
 private:
   void publish_sim_time(rclcpp::Time sim_time);
   rclcpp::Node::SharedPtr node_;  // TODO: delete node
-  mjModel* mj_model_;
-  mjData* mj_data_;
+  mjModel *mj_model_;
+  mjData *mj_data_;
 
   rclcpp::Logger logger_;
   std::shared_ptr<pluginlib::ClassLoader<MujocoSystemInterface>> robot_hw_sim_loader_;

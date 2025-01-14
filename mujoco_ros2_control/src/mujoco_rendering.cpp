@@ -2,11 +2,11 @@
 
 namespace mujoco_ros2_control
 {
-MujocoRendering* MujocoRendering::instance_ = nullptr;
+MujocoRendering *MujocoRendering::instance_ = nullptr;
 
-MujocoRendering* MujocoRendering::get_instance()
+MujocoRendering *MujocoRendering::get_instance()
 {
-  if(instance_ == nullptr)
+  if (instance_ == nullptr)
   {
     instance_ = new MujocoRendering();
   }
@@ -15,20 +15,26 @@ MujocoRendering* MujocoRendering::get_instance()
 }
 
 MujocoRendering::MujocoRendering()
-  : mj_model_(nullptr), mj_data_(nullptr),
-    button_left_(false), button_middle_(false), button_right_(false),
-    lastx_(0.0), lasty_(0.0)
+    : mj_model_(nullptr),
+      mj_data_(nullptr),
+      button_left_(false),
+      button_middle_(false),
+      button_right_(false),
+      lastx_(0.0),
+      lasty_(0.0)
 {
 }
 
-void MujocoRendering::init(rclcpp::Node::SharedPtr & node, mjModel* mujoco_model, mjData* mujoco_data)
+void MujocoRendering::init(
+  rclcpp::Node::SharedPtr &node, mjModel *mujoco_model, mjData *mujoco_data)
 {
   node_ = node;
   mj_model_ = mujoco_model;
   mj_data_ = mujoco_data;
 
   // init GLFW
-  if (!glfwInit()) {
+  if (!glfwInit())
+  {
     mju_error("Could not initialize GLFW");
   }
 
@@ -56,10 +62,7 @@ void MujocoRendering::init(rclcpp::Node::SharedPtr & node, mjModel* mujoco_model
   glfwSetScrollCallback(window_, &MujocoRendering::scroll_callback);
 }
 
-bool MujocoRendering::is_close_flag_raised()
-{
-  return glfwWindowShouldClose(window_);
-}
+bool MujocoRendering::is_close_flag_raised() { return glfwWindowShouldClose(window_); }
 
 void MujocoRendering::update()
 {
@@ -80,7 +83,7 @@ void MujocoRendering::update()
 
 void MujocoRendering::close()
 {
-  //free visualization storage
+  // free visualization storage
   mjv_freeScene(&mjv_scn_);
   mjr_freeContext(&mjr_con_);
 
@@ -90,50 +93,54 @@ void MujocoRendering::close()
 #endif
 }
 
-void MujocoRendering::keyboard_callback(GLFWwindow* window, int key, int scancode, int act, int mods)
+void MujocoRendering::keyboard_callback(
+  GLFWwindow *window, int key, int scancode, int act, int mods)
 {
   get_instance()->keyboard_callback_impl(window, key, scancode, act, mods);
 }
 
-void MujocoRendering::mouse_button_callback(GLFWwindow* window, int button, int act, int mods)
+void MujocoRendering::mouse_button_callback(GLFWwindow *window, int button, int act, int mods)
 {
   get_instance()->mouse_button_callback_impl(window, button, act, mods);
 }
 
-void MujocoRendering::mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
+void MujocoRendering::mouse_move_callback(GLFWwindow *window, double xpos, double ypos)
 {
   get_instance()->mouse_move_callback_impl(window, xpos, ypos);
 }
 
-void MujocoRendering::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void MujocoRendering::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
   get_instance()->scroll_callback_impl(window, xoffset, yoffset);
 }
 
-void MujocoRendering::keyboard_callback_impl(GLFWwindow* window, int key, int scancode, int act, int mods)
+void MujocoRendering::keyboard_callback_impl(
+  GLFWwindow *window, int key, int scancode, int act, int mods)
 {
   // backspace: reset simulation
-  if (act==GLFW_PRESS && key==GLFW_KEY_BACKSPACE) {
+  if (act == GLFW_PRESS && key == GLFW_KEY_BACKSPACE)
+  {
     mj_resetData(mj_model_, mj_data_);
     mj_forward(mj_model_, mj_data_);
   }
 }
 
-void MujocoRendering::mouse_button_callback_impl(GLFWwindow* window, int button, int act, int mods)
+void MujocoRendering::mouse_button_callback_impl(GLFWwindow *window, int button, int act, int mods)
 {
   // update button state
-  button_left_ = (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)==GLFW_PRESS);
-  button_middle_ = (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE)==GLFW_PRESS);
-  button_right_ = (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)==GLFW_PRESS);
+  button_left_ = (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
+  button_middle_ = (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS);
+  button_right_ = (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS);
 
   // update mouse position
   glfwGetCursorPos(window, &lastx_, &lasty_);
 }
 
-void MujocoRendering::mouse_move_callback_impl(GLFWwindow* window, double xpos, double ypos)
+void MujocoRendering::mouse_move_callback_impl(GLFWwindow *window, double xpos, double ypos)
 {
   // no buttons down: nothing to do
-  if (!button_left_ && !button_middle_ && !button_right_) {
+  if (!button_left_ && !button_middle_ && !button_right_)
+  {
     return;
   }
 
@@ -148,8 +155,9 @@ void MujocoRendering::mouse_move_callback_impl(GLFWwindow* window, double xpos, 
   glfwGetWindowSize(window, &width, &height);
 
   // get shift key state
-  bool mod_shift = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)==GLFW_PRESS ||
-                    glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT)==GLFW_PRESS);
+  bool mod_shift =
+    (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ||
+     glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS);
 
   // determine action based on mouse button
   mjtMouse action;
@@ -167,12 +175,12 @@ void MujocoRendering::mouse_move_callback_impl(GLFWwindow* window, double xpos, 
   }
 
   // move camera
-  mjv_moveCamera(mj_model_, action, dx/height, dy/height, &mjv_scn_, &mjv_cam_);
+  mjv_moveCamera(mj_model_, action, dx / height, dy / height, &mjv_scn_, &mjv_cam_);
 }
 
-void MujocoRendering::scroll_callback_impl(GLFWwindow* window, double xoffset, double yoffset)
+void MujocoRendering::scroll_callback_impl(GLFWwindow *window, double xoffset, double yoffset)
 {
   // emulate vertical mouse motion = 5% of window height
-  mjv_moveCamera(mj_model_, mjMOUSE_ZOOM, 0, -0.05*yoffset, &mjv_scn_, &mjv_cam_);
+  mjv_moveCamera(mj_model_, mjMOUSE_ZOOM, 0, -0.05 * yoffset, &mjv_scn_, &mjv_cam_);
 }
-} // namespace mujoco_ros2_control
+}  // namespace mujoco_ros2_control
