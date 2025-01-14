@@ -59,12 +59,18 @@ int main(int argc, const char **argv)
     //  Assuming MuJoCo can simulate faster than real-time, which it usually can,
     //  this loop will finish on time for the next frame to be rendered at 60 fps.
     //  Otherwise add a cpu timer and exit this loop when it is time to render.
+    double period = 1.0 / 60.0;
+    const auto target_time =
+      std::chrono::high_resolution_clock::now() + std::chrono::duration<double>(period);
+
     mjtNum simstart = mujoco_data->time;
-    while (mujoco_data->time - simstart < 1.0 / 60.0)
+    while (mujoco_data->time - simstart < period)
     {
       control.update();
     }
     rendering->update();
+
+    std::this_thread::sleep_until(target_time);
   }
 
   rendering->close();

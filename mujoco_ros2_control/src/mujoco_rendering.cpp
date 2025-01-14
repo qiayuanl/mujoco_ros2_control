@@ -39,7 +39,7 @@ void MujocoRendering::init(
   }
 
   // create window, make OpenGL context current, request v-sync
-  window_ = glfwCreateWindow(1200, 900, "Demo", NULL, NULL);
+  window_ = glfwCreateWindow(1200, 900, "MuJoCo", NULL, NULL);
   glfwMakeContextCurrent(window_);
   glfwSwapInterval(1);
 
@@ -49,7 +49,7 @@ void MujocoRendering::init(
   mjv_defaultScene(&mjv_scn_);
   mjr_defaultContext(&mjr_con_);
 
-  mjv_cam_.distance = 10.;
+  mjv_cam_.distance = 5.;
 
   // create scene and context
   mjv_makeScene(mj_model_, &mjv_scn_, 2000);
