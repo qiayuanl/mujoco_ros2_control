@@ -82,7 +82,7 @@ public:
     std::string name;
     SensorData<Eigen::Quaternion<double>> orientation;
     SensorData<Eigen::Vector3d> angular_velocity;
-    SensorData<Eigen::Vector3d> linear_velocity;
+    SensorData<Eigen::Vector3d> linear_acceleration;
   };
 
 private:
