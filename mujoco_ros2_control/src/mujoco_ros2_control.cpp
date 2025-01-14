@@ -113,8 +113,9 @@ void MujocoRos2Control::init()
   }
 
   auto update_rate = controller_manager_->get_parameter("update_rate").as_int();
-  control_period_ = rclcpp::Duration(std::chrono::duration_cast<std::chrono::nanoseconds>(
-    std::chrono::duration<double>(1.0 / static_cast<double>(update_rate))));
+  control_period_ = rclcpp::Duration(
+    std::chrono::duration_cast<std::chrono::nanoseconds>(
+      std::chrono::duration<double>(1.0 / static_cast<double>(update_rate))));
 
   // Force setting of use_sime_time parameter
   controller_manager_->set_parameter(

@@ -4,17 +4,13 @@
 #include <Eigen/Dense>
 #include <vector>
 
-#include "control_toolbox/pid.hpp"
 #include "joint_limits/joint_limits.hpp"
 #include "mujoco_ros2_control/mujoco_system_interface.hpp"
 
 namespace mujoco_ros2_control
 {
-constexpr char PARAM_KP[]{"_kp"};
-constexpr char PARAM_KI[]{"_ki"};
-constexpr char PARAM_KD[]{"_kd"};
-constexpr char PARAM_I_MAX[]{"_i_max"};
-constexpr char PARAM_I_MIN[]{"_i_min"};
+constexpr char HW_IF_STIFFNESS[] = "stiffness";
+constexpr char HW_IF_DAMPING[] = "damping";
 
 class MujocoSystem : public MujocoSystemInterface
 {
@@ -41,18 +37,14 @@ public:
     double position_command;
     double velocity_command;
     double effort_command;
+    double stiffness_command;
+    double damping_command;
     double min_position_command;
     double max_position_command;
     double min_velocity_command;
     double max_velocity_command;
     double min_effort_command;
     double max_effort_command;
-    control_toolbox::Pid position_pid;
-    control_toolbox::Pid velocity_pid;
-    bool is_position_control_enabled{false};
-    bool is_velocity_control_enabled{false};
-    bool is_effort_control_enabled{false};
-    bool is_pid_enabled{false};
     joint_limits::JointLimits joint_limits;
     bool is_mimic{false};
     int mimicked_joint_index;
@@ -93,8 +85,6 @@ private:
   void set_initial_pose();
   void get_joint_limits(
     urdf::JointConstSharedPtr urdf_joint, joint_limits::JointLimits &joint_limits);
-  control_toolbox::Pid get_pid_gains(
-    const hardware_interface::ComponentInfo &joint_info, std::string command_interface);
   double clamp(double v, double lo, double hi) { return (v < lo) ? lo : (hi < v) ? hi : v; }
 
   std::vector<hardware_interface::StateInterface> state_interfaces_;
