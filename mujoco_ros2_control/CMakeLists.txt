@@ -80,6 +80,11 @@ install(TARGETS
     mujoco_ros2_control
     DESTINATION lib/${PROJECT_NAME})
 
+install(
+    DIRECTORY ${MUJOCO_DOWNLOAD_DIR}/lib/
+    DESTINATION lib/
+)
+
 if (BUILD_TESTING)
     set(ament_cmake_clang_format_CONFIG_FILE "${CMAKE_SOURCE_DIR}/../.clang-format")
     find_package(ament_lint_auto REQUIRED)
