@@ -34,6 +34,7 @@ int main(int argc, const char **argv)
   }
   if (!mujoco_model)
   {
+    RCLCPP_ERROR_STREAM(node->get_logger(), "Load model error: " << error);
     mju_error("Load model error: %s", error);
   }
 
