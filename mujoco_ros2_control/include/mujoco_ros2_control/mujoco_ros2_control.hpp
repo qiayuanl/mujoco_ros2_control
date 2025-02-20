@@ -1,10 +1,11 @@
 #ifndef MUJOCO_ROS2_CONTROL__MUJOCO_ROS2_CONTROL_HPP_
 #define MUJOCO_ROS2_CONTROL__MUJOCO_ROS2_CONTROL_HPP_
 
-#include "controller_manager/controller_manager.hpp"
-#include "pluginlib/class_loader.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "rosgraph_msgs/msg/clock.hpp"
+#include <controller_manager/controller_manager.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <pluginlib/class_loader.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <rosgraph_msgs/msg/clock.hpp>
 
 #include "mujoco/mujoco.h"
 
@@ -22,6 +23,8 @@ public:
 
 private:
   void publish_sim_time(rclcpp::Time sim_time);
+  void publish_poses(rclcpp::Time sim_time);
+
   rclcpp::Node::SharedPtr node_;  // TODO: delete node
   mjModel *mj_model_;
   mjData *mj_data_;
@@ -37,6 +40,9 @@ private:
 
   rclcpp::Time last_update_sim_time_ros_;
   rclcpp::Publisher<rosgraph_msgs::msg::Clock>::SharedPtr clock_publisher_;
+  std::map<std::string, rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr>
+    pose_publishers_;
+  std::map<std::string, geometry_msgs::msg::PoseStamped> pose_msgs_;
 };
 }  // namespace mujoco_ros2_control
 
