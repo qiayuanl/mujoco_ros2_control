@@ -85,6 +85,11 @@ install(
     DESTINATION lib/
 )
 
+install(
+    FILES ${MUJOCO_DOWNLOAD_DIR}/bin/simulate
+    DESTINATION bin
+)
+
 if (BUILD_TESTING)
     set(ament_cmake_clang_format_CONFIG_FILE "${CMAKE_SOURCE_DIR}/../.clang-format")
     find_package(ament_lint_auto REQUIRED)
