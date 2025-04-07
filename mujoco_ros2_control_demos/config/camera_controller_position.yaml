@@ -1,14 +1,14 @@
 controller_manager:
   ros__parameters:
-    update_rate: 100  # Hz
-
-    velocity_controller:
-      type: velocity_controllers/JointGroupVelocityController
+    update_rate: 50
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
-velocity_controller:
+    position_controller:
+      type: position_controllers/JointGroupPositionController
+
+position_controller:
   ros__parameters:
     joints:
-      - slider_to_cart
+      - camera_joint

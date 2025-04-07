@@ -1,3 +1,23 @@
+// Copyright (c) 2025 Sangtaek Lee
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+// THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 #include "mujoco_ros2_control/mujoco_rendering.hpp"
 
 namespace mujoco_ros2_control
@@ -25,23 +45,16 @@ MujocoRendering::MujocoRendering()
 {
 }
 
-void MujocoRendering::init(
-  rclcpp::Node::SharedPtr &node, mjModel *mujoco_model, mjData *mujoco_data)
+void MujocoRendering::init(mjModel *mujoco_model, mjData *mujoco_data)
 {
-  node_ = node;
   mj_model_ = mujoco_model;
   mj_data_ = mujoco_data;
 
-  // init GLFW
-  if (!glfwInit())
-  {
-    mju_error("Could not initialize GLFW");
-  }
-
   // create window, make OpenGL context current, request v-sync
-  window_ = glfwCreateWindow(1200, 900, "MuJoCo", NULL, NULL);
+  glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
+  glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+  window_ = glfwCreateWindow(1200, 900, "Demo", NULL, NULL);
   glfwMakeContextCurrent(window_);
-  glfwSwapInterval(1);
 
   // initialize visualization data structures
   mjv_defaultCamera(&mjv_cam_);
@@ -49,7 +62,8 @@ void MujocoRendering::init(
   mjv_defaultScene(&mjv_scn_);
   mjr_defaultContext(&mjr_con_);
 
-  mjv_cam_.distance = 5.;
+  mjv_cam_.type = mjCAMERA_FREE;
+  mjv_cam_.distance = 8.;
 
   // create scene and context
   mjv_makeScene(mj_model_, &mjv_scn_, 2000);
@@ -60,6 +74,10 @@ void MujocoRendering::init(
   glfwSetCursorPosCallback(window_, &MujocoRendering::mouse_move_callback);
   glfwSetMouseButtonCallback(window_, &MujocoRendering::mouse_button_callback);
   glfwSetScrollCallback(window_, &MujocoRendering::scroll_callback);
+
+  // This might cause tearing, but having RViz and the renderer both open can
+  // wreak havoc on the rendering process.
+  glfwSwapInterval(0);
 }
 
 bool MujocoRendering::is_close_flag_raised() { return glfwWindowShouldClose(window_); }
@@ -69,6 +87,10 @@ void MujocoRendering::update()
   // get framebuffer viewport
   mjrRect viewport = {0, 0, 0, 0};
   glfwGetFramebufferSize(window_, &viewport.width, &viewport.height);
+  glfwMakeContextCurrent(window_);
+
+  // Reset the buffer
+  mjr_setBuffer(mjFB_WINDOW, &mjr_con_);
 
   // update scene and render
   mjv_updateScene(mj_model_, mj_data_, &mjv_opt_, NULL, &mjv_cam_, mjCAT_ALL, &mjv_scn_);
@@ -86,6 +108,7 @@ void MujocoRendering::close()
   // free visualization storage
   mjv_freeScene(&mjv_scn_);
   mjr_freeContext(&mjr_con_);
+  glfwDestroyWindow(window_);
 
   // terminate GLFW (crashes with Linux NVidia drivers)
 #if defined(__APPLE__) || defined(_WIN32)
@@ -115,7 +138,7 @@ void MujocoRendering::scroll_callback(GLFWwindow *window, double xoffset, double
 }
 
 void MujocoRendering::keyboard_callback_impl(
-  GLFWwindow *window, int key, int scancode, int act, int mods)
+  GLFWwindow * /* window */, int key, int /* scancode */, int act, int /* mods */)
 {
   // backspace: reset simulation
   if (act == GLFW_PRESS && key == GLFW_KEY_BACKSPACE)
@@ -125,7 +148,8 @@ void MujocoRendering::keyboard_callback_impl(
   }
 }
 
-void MujocoRendering::mouse_button_callback_impl(GLFWwindow *window, int button, int act, int mods)
+void MujocoRendering::mouse_button_callback_impl(
+  GLFWwindow *window, int /* button */, int /* act */, int /* mods */)
 {
   // update button state
   button_left_ = (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
@@ -178,9 +202,11 @@ void MujocoRendering::mouse_move_callback_impl(GLFWwindow *window, double xpos, 
   mjv_moveCamera(mj_model_, action, dx / height, dy / height, &mjv_scn_, &mjv_cam_);
 }
 
-void MujocoRendering::scroll_callback_impl(GLFWwindow *window, double xoffset, double yoffset)
+void MujocoRendering::scroll_callback_impl(
+  GLFWwindow * /* window */, double /* xoffset */, double yoffset)
 {
   // emulate vertical mouse motion = 5% of window height
   mjv_moveCamera(mj_model_, mjMOUSE_ZOOM, 0, -0.05 * yoffset, &mjv_scn_, &mjv_cam_);
 }
+
 }  // namespace mujoco_ros2_control
