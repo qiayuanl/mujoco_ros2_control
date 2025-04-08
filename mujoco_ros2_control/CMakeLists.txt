@@ -22,6 +22,7 @@ find_package(urdf REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(mujoco_sim_ros2 REQUIRED)
+find_package(mujoco_ament REQUIRED)
 
 set(THIS_PACKAGE_DEPENDS
     ament_cmake
@@ -33,33 +34,15 @@ set(THIS_PACKAGE_DEPENDS
     urdf
     glfw3
     mujoco_sim_ros2
+    mujoco_ament
 )
-
-find_package(mujoco QUIET)
-if (mujoco_FOUND)
-    message(STATUS "Mujoco build from source has been found")
-    set(MUJOCO_LIB mujoco::mujoco)
-    set(MUJOCO_INCLUDE_DIR ${MUJOCO_INCLUDE_DIR})
-elseif (DEFINED ENV{MUJOCO_DIR})
-    message(STATUS "Mujoco build from source has not been found. Attempting to find the binary in $ENV{MUJOCO_DIR} instead.")
-    find_library(MUJOCO_LIB mujoco HINTS $ENV{MUJOCO_DIR}/lib)
-    if (NOT MUJOCO_LIB)
-        message(FATAL_ERROR "Failed to find binary in $ENV{MUJOCO_DIR}")
-    endif ()
-    set(MUJOCO_INCLUDE_DIR $ENV{MUJOCO_DIR}/include)
-else ()
-    message(FATAL_ERROR "Failed to find mujoco with find_package.
-  Either build and install mujoco from source or set the MUJOCO_DIR environment variable to tell CMake where to find the binary install. ")
-endif ()
 
 add_library(mujoco_system_plugins SHARED src/mujoco_system.cpp)
 ament_target_dependencies(mujoco_system_plugins ${THIS_PACKAGE_DEPENDS})
-target_link_libraries(mujoco_system_plugins ${MUJOCO_LIB})
 target_include_directories(mujoco_system_plugins
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
-    ${MUJOCO_INCLUDE_DIR}
     ${EIGEN3_INCLUDE_DIR})
 pluginlib_export_plugin_description_file(mujoco_ros2_control mujoco_system_plugins.xml)
 
@@ -67,12 +50,10 @@ add_library(mujoco_ros2_control-system SHARED
     src/mujoco_ros2_control_plugin.cpp
     src/mujoco_ros2_control.cpp)
 ament_target_dependencies(mujoco_ros2_control-system ${THIS_PACKAGE_DEPENDS})
-target_link_libraries(mujoco_ros2_control-system ${MUJOCO_LIB})
 target_include_directories(mujoco_ros2_control-system
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
-    ${MUJOCO_INCLUDE_DIR}
     ${EIGEN3_INCLUDE_DIR})
 pluginlib_export_plugin_description_file(mujoco_sim_ros2 mujoco_ros2_control_plugins.xml)
 

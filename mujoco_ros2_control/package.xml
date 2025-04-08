@@ -24,6 +24,7 @@
     <depend>eigen</depend>
     <depend>libglfw3-dev</depend>
     <depend>mujoco_sim_ros2</depend>
+    <depend>mujoco_ament</depend>
 
     <exec_depend>ros2controlcli</exec_depend>
     <exec_depend>joint_state_broadcaster</exec_depend>
