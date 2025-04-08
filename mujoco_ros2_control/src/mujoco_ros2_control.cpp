@@ -187,15 +187,20 @@ void MujocoRos2Control::update()
   publish_sim_time(sim_time_ros);
   publish_poses(sim_time_ros);
 
+  if (sim_period.seconds() < 0)
+  {
+    RCLCPP_INFO(logger_, "Simulation time reset.");
+    last_update_sim_time_ros_ = sim_time_ros;
+  }
+
   if (sim_period >= control_period_)
   {
     controller_manager_->read(sim_time_ros, sim_period);
     controller_manager_->update(sim_time_ros, sim_period);
+    // use same time as for read and update call - this is how it is done in ros2_control_node
+    controller_manager_->write(sim_time_ros, sim_period);
     last_update_sim_time_ros_ = sim_time_ros;
   }
-
-  // use same time as for read and update call - this is how it is done in ros2_control_node
-  controller_manager_->write(sim_time_ros, sim_period);
 }
 
 void MujocoRos2Control::publish_sim_time(rclcpp::Time sim_time)
