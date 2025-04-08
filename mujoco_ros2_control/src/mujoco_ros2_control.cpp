@@ -18,6 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include <memory>
+
 #include "hardware_interface/component_parser.hpp"
 #include "hardware_interface/resource_manager.hpp"
 #include "hardware_interface/system_interface.hpp"
@@ -74,6 +76,7 @@ void MujocoRos2Control::init()
   std::vector<hardware_interface::HardwareInfo> control_hardware_info;
   try
   {
+    node_->declare_parameter("robot_description", "");
     urdf_string = node_->get_parameter("robot_description").as_string();
     control_hardware_info = hardware_interface::parse_control_resources_from_urdf(urdf_string);
   }
@@ -85,8 +88,8 @@ void MujocoRos2Control::init()
 
   try
   {
-    robot_hw_sim_loader_.reset(new pluginlib::ClassLoader<MujocoSystemInterface>(
-      "mujoco_ros2_control", "mujoco_ros2_control::MujocoSystemInterface"));
+    robot_hw_sim_loader_ = std::make_shared<pluginlib::ClassLoader<MujocoSystemInterface>>(
+      "mujoco_ros2_control", "mujoco_ros2_control::MujocoSystemInterface");
   }
   catch (pluginlib::LibraryLoadException &ex)
   {
@@ -140,8 +143,8 @@ void MujocoRos2Control::init()
   // Create the controller manager
   RCLCPP_INFO(logger_, "Loading controller_manager");
   cm_executor_ = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
-  controller_manager_.reset(new controller_manager::ControllerManager(
-    std::move(resource_manager), cm_executor_, "controller_manager", node_->get_namespace()));
+  controller_manager_ = std::make_shared<controller_manager::ControllerManager>(
+    std::move(resource_manager), cm_executor_, "controller_manager", node_->get_namespace());
 
   cm_executor_->add_node(controller_manager_);
 
@@ -184,8 +187,6 @@ void MujocoRos2Control::update()
   publish_sim_time(sim_time_ros);
   publish_poses(sim_time_ros);
 
-  mj_step1(mj_model_, mj_data_);
-
   if (sim_period >= control_period_)
   {
     controller_manager_->read(sim_time_ros, sim_period);
@@ -195,8 +196,6 @@ void MujocoRos2Control::update()
 
   // use same time as for read and update call - this is how it is done in ros2_control_node
   controller_manager_->write(sim_time_ros, sim_period);
-
-  mj_step2(mj_model_, mj_data_);
 }
 
 void MujocoRos2Control::publish_sim_time(rclcpp::Time sim_time)
