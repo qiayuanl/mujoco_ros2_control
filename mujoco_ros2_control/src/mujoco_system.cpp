@@ -149,7 +149,7 @@ void MujocoSystem::register_joints(
     }
 
     // save information in joint_states_ variable
-    JointState joint_state;
+    JointState joint_state{};
     joint_state.name = joint.name;
     joint_state.mj_joint_type = mj_model_->jnt_type[mujoco_joint_id];
     joint_state.mj_pos_adr = mj_model_->jnt_qposadr[mujoco_joint_id];
@@ -188,19 +188,6 @@ void MujocoSystem::register_joints(
       }
     }
 
-    auto get_initial_value = [this](const hardware_interface::InterfaceInfo &interface_info)
-    {
-      if (!interface_info.initial_value.empty())
-      {
-        double value = std::stod(interface_info.initial_value);
-        return value;
-      }
-      else
-      {
-        return 0.0;
-      }
-    };
-
     // state interfaces
     state_interfaces_.emplace_back(
       joint.name, hardware_interface::HW_IF_POSITION, &last_joint_state.position);
@@ -219,10 +206,6 @@ void MujocoSystem::register_joints(
     command_interfaces_.emplace_back(
       joint.name, HW_IF_STIFFNESS, &last_joint_state.stiffness_command);
     command_interfaces_.emplace_back(joint.name, HW_IF_DAMPING, &last_joint_state.damping_command);
-
-    last_joint_state.position_command = last_joint_state.position;
-    last_joint_state.velocity_command = last_joint_state.velocity;
-    last_joint_state.effort_command = last_joint_state.effort;
   }
 }
 
