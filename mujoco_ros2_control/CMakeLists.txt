@@ -23,6 +23,7 @@ find_package(glfw3 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(mujoco_sim_ros2 REQUIRED)
 find_package(mujoco_ament REQUIRED)
+find_package(nav_msgs REQUIRED)
 
 set(THIS_PACKAGE_DEPENDS
     ament_cmake
@@ -35,6 +36,7 @@ set(THIS_PACKAGE_DEPENDS
     glfw3
     mujoco_sim_ros2
     mujoco_ament
+    nav_msgs
 )
 
 add_library(mujoco_system_plugins SHARED src/mujoco_system.cpp)

@@ -58,13 +58,12 @@ void MujocoRos2Control::init()
     if (
       mj_model_->sensor_type[i] == mjSENS_FRAMEPOS || mj_model_->sensor_type[i] == mjSENS_FRAMEQUAT)
     {
-      if (pose_publishers_.find(sensor_site) == pose_publishers_.end())
+      if (odom_publishers_.find(sensor_site) == odom_publishers_.end())
       {
-        pose_publishers_.insert(
+        odom_publishers_.insert(
           std::make_pair(
-            sensor_site,
-            node_->create_publisher<geometry_msgs::msg::PoseStamped>(sensor_site, 10)));
-        pose_msgs_.insert(std::make_pair(sensor_site, geometry_msgs::msg::PoseStamped()));
+            sensor_site, node_->create_publisher<nav_msgs::msg::Odometry>(sensor_site, 10)));
+        odom_msgs_.insert(std::make_pair(sensor_site, nav_msgs::msg::Odometry()));
         RCLCPP_INFO_STREAM(logger_, "Setting up publisher for position sensor: " << sensor_site);
       }
     }
@@ -217,27 +216,27 @@ void MujocoRos2Control::publish_poses(rclcpp::Time sim_time)
   for (int i = 0; i < mj_model_->nsensor; i++)
   {
     std::string sensor_site = mj_id2name(mj_model_, mjOBJ_SITE, mj_model_->sensor_objid[i]);
-    auto &pose_msg = pose_msgs_.at(sensor_site);
+    auto &pose_msg = odom_msgs_.at(sensor_site);
     pose_msg.header.stamp = sim_time;
     pose_msg.header.frame_id = "odom";
     if (mj_model_->sensor_type[i] == mjSENS_FRAMEPOS)
     {
-      pose_msg.pose.position.x = mj_data_->sensordata[index + 0];
-      pose_msg.pose.position.y = mj_data_->sensordata[index + 1];
-      pose_msg.pose.position.z = mj_data_->sensordata[index + 2];
+      pose_msg.pose.pose.position.x = mj_data_->sensordata[index + 0];
+      pose_msg.pose.pose.position.y = mj_data_->sensordata[index + 1];
+      pose_msg.pose.pose.position.z = mj_data_->sensordata[index + 2];
     }
     else if (mj_model_->sensor_type[i] == mjSENS_FRAMEQUAT)
     {
-      pose_msg.pose.orientation.w = mj_data_->sensordata[index + 0];
-      pose_msg.pose.orientation.x = mj_data_->sensordata[index + 1];
-      pose_msg.pose.orientation.y = mj_data_->sensordata[index + 2];
-      pose_msg.pose.orientation.z = mj_data_->sensordata[index + 3];
+      pose_msg.pose.pose.orientation.w = mj_data_->sensordata[index + 0];
+      pose_msg.pose.pose.orientation.x = mj_data_->sensordata[index + 1];
+      pose_msg.pose.pose.orientation.y = mj_data_->sensordata[index + 2];
+      pose_msg.pose.pose.orientation.z = mj_data_->sensordata[index + 3];
     }
     index += mj_model_->sensor_dim[i];
   }
-  for (const auto &pose_publisher : pose_publishers_)
+  for (const auto &pose_publisher : odom_publishers_)
   {
-    pose_publisher.second->publish(pose_msgs_.at(pose_publisher.first));
+    pose_publisher.second->publish(odom_msgs_.at(pose_publisher.first));
   }
 }
 

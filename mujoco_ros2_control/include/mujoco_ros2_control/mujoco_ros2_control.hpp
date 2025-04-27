@@ -24,7 +24,7 @@
 #include <memory>
 
 #include <controller_manager/controller_manager.hpp>
-#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <nav_msgs/msg/odometry.hpp>
 #include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rosgraph_msgs/msg/clock.hpp>
@@ -62,9 +62,8 @@ private:
 
   rclcpp::Time last_update_sim_time_ros_;
   rclcpp::Publisher<rosgraph_msgs::msg::Clock>::SharedPtr clock_publisher_;
-  std::map<std::string, rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr>
-    pose_publishers_;
-  std::map<std::string, geometry_msgs::msg::PoseStamped> pose_msgs_;
+  std::map<std::string, rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr> odom_publishers_;
+  std::map<std::string, nav_msgs::msg::Odometry> odom_msgs_;
 };
 }  // namespace mujoco_ros2_control
 
