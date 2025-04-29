@@ -110,7 +110,8 @@ hardware_interface::return_type MujocoSystem::write(
       joint_state.stiffness_command * (joint_state.position_command - joint_state.position) +
       joint_state.damping_command * (joint_state.velocity_command - joint_state.velocity) +
       joint_state.effort_command;
-    mj_data_->qfrc_applied[joint_state.mj_vel_adr] = cmd;
+    mj_data_->qfrc_applied[joint_state.mj_vel_adr] =
+      clamp(cmd, -joint_state.joint_limits.max_effort, joint_state.joint_limits.max_effort);
   }
   return hardware_interface::return_type::OK;
 }
