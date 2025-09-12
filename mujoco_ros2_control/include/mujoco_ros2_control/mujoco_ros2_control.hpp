@@ -35,10 +35,15 @@
 
 namespace mujoco_ros2_control
 {
+// declare in advance
+class MujocoResourceManager;
+
 class MujocoRos2Control
 {
 public:
-  MujocoRos2Control(rclcpp::Node::SharedPtr &node, mjModel *mujoco_model, mjData *mujoco_data);
+  MujocoRos2Control(
+    rclcpp::Node::SharedPtr &node, rclcpp::NodeOptions cm_node_option, mjModel *mujoco_model,
+    mjData *mujoco_data);
   ~MujocoRos2Control();
   void init();
   void update();
@@ -48,11 +53,11 @@ private:
   void publish_poses(rclcpp::Time sim_time);
 
   rclcpp::Node::SharedPtr node_;  // TODO(sangteak601): delete node
+  rclcpp::NodeOptions cm_node_option_;
   mjModel *mj_model_;
   mjData *mj_data_;
 
   rclcpp::Logger logger_;
-  std::shared_ptr<pluginlib::ClassLoader<MujocoSystemInterface>> robot_hw_sim_loader_;
 
   std::shared_ptr<controller_manager::ControllerManager> controller_manager_;
   rclcpp::executors::MultiThreadedExecutor::SharedPtr cm_executor_;

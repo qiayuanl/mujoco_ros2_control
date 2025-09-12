@@ -11,10 +11,9 @@
 namespace mujoco_ros2_control
 {
 void MujocoRos2ControlPlugin::Configure(
-  rclcpp::Node::SharedPtr &node, rclcpp::NodeOptions /*cm_node_option*/, mjModel *model,
-  mjData *data)
+  rclcpp::Node::SharedPtr &node, rclcpp::NodeOptions cm_node_option, mjModel *model, mjData *data)
 {
-  control_ = std::make_unique<MujocoRos2Control>(node, model, data);
+  control_ = std::make_unique<MujocoRos2Control>(node, cm_node_option, model, data);
   control_->init();
   RCLCPP_INFO_STREAM(
     node->get_logger(), "Mujoco ros2 controller has been successfully initialized !");
