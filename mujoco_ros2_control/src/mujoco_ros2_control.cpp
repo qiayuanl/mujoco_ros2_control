@@ -109,10 +109,26 @@ MujocoRos2Control::MujocoRos2Control(
 
 MujocoRos2Control::~MujocoRos2Control()
 {
+  // Stop the executor spin thread first.
   stop_cm_thread_ = true;
-  cm_executor_->remove_node(controller_manager_);
-  cm_executor_->cancel();
-  cm_thread_.join();
+  if (cm_executor_)
+  {
+    cm_executor_->cancel();
+  }
+  if (cm_thread_.joinable())
+  {
+    cm_thread_.join();
+  }
+  // Destroy the controller_manager while it is STILL associated with the
+  // (cancelled) executor. ~ControllerManager deactivates the controllers and
+  // shuts down the hardware, and that path resolves the node's executor.
+  // Removing the node first -- or letting the executor be destroyed before the
+  // CM, which the reverse member-destruction order (cm_executor_ is declared
+  // after controller_manager_) would otherwise do -- throws
+  // "Node '/controller_manager' needs to be associated with an executor" and
+  // aborts (SIGABRT) on shutdown.
+  controller_manager_.reset();
+  cm_executor_.reset();
 }
 
 void MujocoRos2Control::init()
